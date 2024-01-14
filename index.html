@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Toeplitz-Visualisierung</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js"></script>
+</head>
+<body>
+
+
+<canvas id="canvas" width="800" height="800" style="border: 2px solid blue" ></canvas>
+<canvas id="canvas2" width="800" height="800" style="border: 2px solid blue" ></canvas>
+
+<button id="btnDrawManually" onclick="drawBezierCurvesManually()"> draw Bezier Manually</button>
+<button id="btnTraverseManually" onclick="traverseTheCurve()"> traverse the Curve</button>
+
+
+
+<script src="drawLib.js"></script>
+<script src="calcSquares.js"></script>
+<script src="calcSquaresWOInterpolation.js"></script>
+<script src="script.js"></script>
+<script src="clientDrawing.js"></script>
+
+</body>
+</html>
