@@ -1,2 +1,2 @@
 # ToeplitzVisualization
-Visualization of finding squares in arbitraryy Jordan-curves in the plane
+Visualization of finding squares in arbitrary Jordan-curves in the plane
