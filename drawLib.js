@@ -81,6 +81,15 @@ function drawBezierCurvesManually() {
 		ctx2.strokeStyle = "red";
 		ctx2.stroke();
 		ctx2.closePath();
+
+
+		/*ctx2.beginPath();
+		ctx2.strokeColor = "black";
+		ctx2.arc(bezierCurves[i][0].x, bezierCurves[i][0].y, 5, 0, 2 * Math.PI);
+		ctx2.fillStyle = "blue";
+		ctx2.fill();
+		ct2.closePath();*/
+
 	}
 }
 
@@ -131,28 +140,19 @@ function visualizePoints(candidates) {
 
 
 
-function drawTheSquare(candidates, dis) {
-	var pointOff1 = new Point(candidates[0].x, candidates[0].y);
-	var pointOff2 = new Point(candidates[1].x, candidates[1].y);
-	var pointOff3 = new Point(candidates[2].x, candidates[2].y);
-	var pointOff4 = new Point(candidates[3].x, candidates[3].y);
 
-	drawTheSquareWOI([path.getNearestPoint(pointOff1), path.getNearestPoint(pointOff2), path.getNearestPoint(pointOff3), path.getNearestPoint(pointOff4)], dis);
-}
+function drawTheSquare(candidates, context) {
 
+	console.log("Candidates: ", candidates);
 
-function drawTheSquareWOI(candidates, dis) {
-
-	ctx2.beginPath();
-	ctx2.moveTo(candidates[0].x, candidates[0].y);
+	context.beginPath();
+	context.moveTo(candidates[0].x, candidates[0].y);
 
 	for (let i = 1; i < candidates.length; i++) {
-		ctx2.lineTo(candidates[i].x, candidates[i].y);
+		context.lineTo(candidates[i].x, candidates[i].y);
 	}
-
-	ctx2.closePath();
-	ctx2.stroke();	
-
+	context.closePath();
+	context.stroke();
 }
 
 

@@ -96,7 +96,6 @@ function calcCandidatesForPoint(referencePoint, dis, bezierCurves) {
 		}
 
 	}
-	//console.log("counter= " + counter);
 	return points;
 }
 
@@ -145,15 +144,14 @@ function findSquares(n, candidates, dis) {
 
 		if (isSquare(candidates, dis)) {
 			//drawBezierCurvesManually();
-			drawTheSquareWOI(candidates, dis);
-			//visualizePoints(candidates);
-			path.strokeColor = "white";
+			drawTheSquare(candidates, ctx2);
+			//path.strokeColor = "white";
 			drawBezierCurvesManually();
 			path.strokeColor = "black";
 			breakFlag = true;
 			console.log(candidates[0], candidates[1], candidates[2], candidates[3]);
 			alert("Sqaure found");
-			//return;
+			return;
 		} else {
 			return;
 		}
@@ -213,7 +211,6 @@ function isSquare(candidates, dis) {
 	let angleDegreeBeta = Math.acos(scalarProdBeta / (disP3P4 * disP2P3)) * (180 / Math.PI);
 	let angleDegreeGamma = Math.acos(scalarProdGamma / (disP2P3 * disP1P2))  * (180 / Math.PI);
 	//console.log("Angle: " , angleDegreeAlpha, angleDegreeBeta, angleDegreeGamma);
-
 
 
 

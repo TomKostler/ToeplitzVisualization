@@ -1,5 +1,5 @@
 
-function getDistance(pointA, pointB) {
+function getDistanceWOI(pointA, pointB) {
 	return Math.sqrt(
 		Math.pow(pointA.x - pointB.x, 2) +
 		Math.pow(pointA.y - pointB.y, 2)
@@ -7,11 +7,29 @@ function getDistance(pointA, pointB) {
 }
 
 function calcCandidatesForPointWOI(referencePoint, dis) {
-	candidates = [];
-	for (let i = 0; i < path.length; i++) {
-		if (Math.abs(getDistance(referencePoint, path[i]) - dis) <= offset) {
+	let candidates = [];
+	let distanceOld = 0;
+	let distance;
+	let stepsCandidatesWOI = 1;
+
+	for (let i = 0; i < path.length; i+=stepsCandidatesWOI) {
+		distance = Math.abs(getDistance(referencePoint, path[i]) - dis);
+		if (distance <= offset) {
 			candidates.push(path[i]);
 		}
+
+		//inferring
+		if ((distance - dis) > (distanceOld - dis) && stepsCandidatesWOI <= 20) {
+			stepsCandidatesWOI += inferringRateWOI;
+		} else {
+			if ((distance > dis) && (stepsCandidatesWOI-inferringRateWOI) >= 1) {
+				stepsCandidatesWOI -= inferringRateWOI;
+			}
+		}
+
+		distanceOld = distance;
+
+
 	}
 	return candidates;
 }
@@ -22,18 +40,15 @@ function findSquaresWOI(n, candidates, dis) {
 	if (n == 4) {
 		//visualizePoints(candidates);
 
-		/*counter++;
-		if (counter == 1) {
-			breakFlag = true;
-		}*/
-
+		if (breakFlag) return;
 
 		if (isSquareWOI(candidates, dis)) {
 			breakFlag = true;
 			console.log(candidates[0], candidates[1], candidates[2], candidates[3]);
 			visualizePoints(candidates);
-			drawTheSquare(candidates);
+			drawTheSquare(candidates, ctx);
 			alert("Sqaure found");
+			return;
 		} else {
 			return;
 		}
@@ -43,6 +58,7 @@ function findSquaresWOI(n, candidates, dis) {
 	let candidatesLevelN = calcCandidatesForPointWOI(candidates[candidates.length-1], dis);
 
 	for (let i = 0; i < candidatesLevelN.length; i++) {
+		if (breakFlag) return;
 		candidates.push(candidatesLevelN[i]);
 		findSquaresWOI(n+1, candidates, dis);
 		candidates.pop();
@@ -70,10 +86,10 @@ function isSquareWOI(candidates, dis) {
 
 
 
-	let disP1P2 = getDistance(candidates[0], candidates[1]);
-	let disP2P3 = getDistance(candidates[1], candidates[2]);
-	let disP3P4 = getDistance(candidates[2], candidates[3]);
-	let disP4P1 = getDistance(candidates[3], candidates[0]);
+	let disP1P2 = getDistanceWOI(candidates[0], candidates[1]);
+	let disP2P3 = getDistanceWOI(candidates[1], candidates[2]);
+	let disP3P4 = getDistanceWOI(candidates[2], candidates[3]);
+	let disP4P1 = getDistanceWOI(candidates[3], candidates[0]);
 
 
 

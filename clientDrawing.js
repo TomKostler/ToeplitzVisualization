@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
 	var drawing = false;
+	var oldMousePos;
 
 	if (!interpolation) {
 		// Event-Handler for non interpolated Curve
@@ -7,24 +8,30 @@ document.addEventListener("DOMContentLoaded", function() {
 			drawing = true;
 			ctx.beginPath();
 			ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-			path.push({ x: e.clientX - canvas.offsetLeft, y: e.clientY - canvas.offsetTop });
-			
+			//path.push({ x: e.clientX - canvas.offsetLeft, y: e.clientY - canvas.offsetTop });
+			path.push({x: e.clientX - canvas.offsetLeft, y: e.clientY - canvas.offsetTop});
+
 		});
 
-		canvas.addEventListener("mousemove", function(e) {
-			if (!drawing) return;
-			ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-			ctx.stroke();
-			path.push({ x: e.clientX - canvas.offsetLeft, y: e.clientY - canvas.offsetTop });
-			
-		});
+	
+    	canvas.addEventListener('mousemove', function(e) {
+    		if (!drawing) return;
+        	let mousePos = {x: e.clientX - canvas.offsetLeft, y: e.clientY - canvas.offsetTop}
+        	path.push(mousePos);
+        	ctx.lineTo(mousePos.x, mousePos.y);
+        	ctx.stroke();
+
+        	precisePath(path[path.length-2], path[path.length-1], false);
+
+    	});
+	
 
 		canvas.addEventListener("mouseup", function(e) {
 			drawing = false;
 			autoCompletePath(path[path.length-1], path[0]);
-			traverseTheCurveWOI();
 		});
 	}
+
 
 
 	else {
@@ -41,7 +48,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		paper.view.onMouseDrag = function(event) {
 			if (!drawing) return;
-			//path.strokeColor = "white";
 			path.add(event.point);
 		};
 
@@ -77,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function() {
 			    bezierCurves.push([p0, p1, p2, p3]);
 			}
 			bezierCurves.push([path.segments[path.segments.length-1].point, path.segments[path.segments.length-1].point.add(path.segments[path.segments.length-1].handleOut), path.segments[0].point.add(path.segments[0].handleIn.multiply(-1)), path.segments[0].point]);
-			if (!interpolation) autoCompletePath(path.segments[0].point, path.segments[path.segments.length-1].point);
 
 
 			drawBezierCurvesManually();
@@ -87,28 +92,39 @@ document.addEventListener("DOMContentLoaded", function() {
 			//traverseTheCurve();
 		};
 	}
+});
 
 
-	//if path not cyclic, finish it
-	function autoCompletePath(start, end) {
 
-		drawPoint(start, "blue");
-		drawPoint(end, "blue");
 
-		for (let i = 0; i <= numberOfPointsAutoComplete; i++) {
-			let t = i / numberOfPointsAutoComplete; // Interpolationsfactor
+//if path not cyclic, finish it
+function autoCompletePath(start, end) {
+
+	precisePath(start, end, true);
+
+	ctx.moveTo(end.x, end.y);
+	ctx.lineTo(start.x, start.y);
+	ctx.stroke();
+}
+
+
+
+// make sure (no matter the mouse speed while drawing) there are enough Points in the path
+function precisePath(start, end, autoCompCheck) {
+	let distance = getDistance(start, end);
+
+	if (distance > 6 || autoCompCheck) {
+		let numberPoints = Math.round(distance/3);
+		for (let i = 0; i <= numberPoints; i++) {
+			let t = i / numberPoints; // Interpolationsfactor
 			let x = start.x + t * (end.x - start.x);
 			let y = start.y + t * (end.y - start.y);
 
 			path.push({ x: x, y: y });
 		}
-
-		ctx.moveTo(end.x, end.y);
-		ctx.lineTo(start.x, start.y);
-		ctx.stroke();
-		
 	}
-});
+}
+
 
 
 

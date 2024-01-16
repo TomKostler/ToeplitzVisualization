@@ -10,11 +10,13 @@
 
 
 //if the curve should be interpolated => if true, number of points infinite => higher chance of finding square
-var interpolation = true;
+var interpolation = false;
 
-var numberOfPointsAutoComplete = 70;
+var numberOfPointsAutoComplete = 20;
 
 var inferringRate = 0.055;
+var inferringRateWOI = 1;
+
 
 //startPoint Values
 var startT = 0.0;
@@ -35,6 +37,8 @@ var skipSteps = 11;
 //the maximum distance a side of a sqaure on the curve is allowed to be
 var disMax = 800;
 var disAdd = 2;
+
+var disStart = 10;
 
 
 //colors the found Points of the square should be colored with
@@ -72,9 +76,7 @@ function traverseTheCurveDistance(P1) {
 }
 
 function traverseTheCurve() {
-
 	//drawBezierCurvesManually();
-
 
 	disMax = getMaxDis();
 	console.log("disMax: ", disMax);
@@ -86,8 +88,6 @@ function traverseTheCurve() {
 		offset = 0.5;
 	}
 
-	initLookUpTable();
-	console.log(lookUpCandidates);
 
 	console.log(bezierCurves.length);
 	for (var spline = 0; spline < bezierCurves.length; spline++) {
@@ -96,7 +96,6 @@ function traverseTheCurve() {
 		for (var t = 0; t <= 1; t += steps) {
 			let newCoord = calculateCubicBezierPoint(bezierCurves[spline], t);
 			var newP1 = new Point(newCoord.x, newCoord.y, startSpline, startT);
-			//drawPoint(newP1, "blue");
 			traverseTheCurveDistance(newP1);
 		}
 	}
@@ -108,38 +107,24 @@ function traverseTheCurve() {
 
 /*____________Without Interpolation______________________________*/
 function traverseTheCurveDistanceWOI(P1) {
-	for (let dis = 0; dis < disMax; dis++) {
+	for (let dis = disStart; dis < disMax; dis++) {
 		findSquaresWOI(1, [P1], dis);
 	}
 }
 
 
 function traverseTheCurveWOI() {
+	console.log("Path-Length: ", path.length);
+	disMax = getMaxDisWOI();
+	console.log("disMax: ", disMax);
 	for (let i = 0; i < path.length; i++) {
 		traverseTheCurveDistanceWOI(path[i]);
 	}
+	console.log("Finished");
 }
 
 
 
-
-function initLookUpTable() {
-	lookUpCandidates = new Array(bezierCurves.length);
-	let stepSize = Math.floor(1/steps);
-	let disSize = Math.floor(disMax/disAdd);
-
-	for (let i = 0; i < bezierCurves.length; i++) {
-	    lookUpCandidates[i] = new Array(stepSize);
-
-	    for (let j = 0; j <= stepSize; j++) {
-	        lookUpCandidates[i][j] = new Array(disSize);
-
-	        for (let k = 0; k <= disSize; k++) {
-				lookUpCandidates[i][j][k] = [];
-	        }
-	    }
-	}
-}
 
 
 
@@ -158,6 +143,18 @@ function getMaxDis() {
 	return Math.round(maxDis);
 }
 
+function getMaxDisWOI() {
+	var maxDis = 0;
+	for (let p1 = 0; p1 < path.length; p1++) {
+		for (let p2 = 0; p2 < path.length; p2++) {
+			let distance = getDistanceWOI(path[p1], path[p2]);
+			if (distance > maxDis) {
+				maxDis = distance;
+			}
+		}			
+	}
+	return Math.round(maxDis);
+}
 
 
 
