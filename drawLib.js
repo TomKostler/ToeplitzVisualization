@@ -1,78 +1,18 @@
 /*
-	File for everything drawing/canvas related
+	File with util functions for drawing on the canvas'
 */
 
 
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const ctx2 = document.getElementById("canvas2").getContext("2d");
-
-
-/*
-//For the circle
-var centerX = 200;
-var centerY = 200;
-var radius = 100;
-const controlPoint = 4 * (Math.sqrt(2) - 1) / 3 * radius;
-
-function drawCircleWithTwoCurves() {
-
-	ctx.beginPath();
-
-	// Erste Bezier-Kurve (obere Hälfte des Kreises)
-	ctx.moveTo(centerX + radius, centerY);
-	ctx.bezierCurveTo(centerX + radius, centerY - controlPoint, centerX + controlPoint, centerY - radius, centerX, centerY - radius);
-	ctx.bezierCurveTo(centerX - controlPoint, centerY - radius, centerX - radius, centerY - controlPoint, centerX - radius, centerY);
-	ctx.bezierCurveTo(centerX - radius, centerY + controlPoint, centerX - controlPoint, centerY + radius, centerX, centerY + radius);
-	ctx.bezierCurveTo(centerX + controlPoint, centerY + radius, centerX + radius, centerY + controlPoint, centerX + radius, centerY);
-
-
-	// Stil und Zeichnen
-	ctx.strokeStyle = 'blue';
-	ctx.stroke();
-	ctx.closePath();
-}
-
-
-//drawCircleWithTwoCurves();
+var canvas = document.getElementById("canvasMain");
+var ctx = canvas.getContext("2d");
+var canvas2 = document.getElementById("canvas2");
+var ctx2 = canvas2.getContext("2d");
 
 
 
 
-// Define the points as {x, y}
-let start = { x: 50, y: 20 };
-let cp1 = { x: 430, y: 30 };
-let cp2 = { x: 600, y: 80 };
-let end = { x: 250, y: 100 };
-
-
-let cp3 = { x: 50, y: 90 };
-let cp4 = { x: 10, y: 10 };
-
-
-
-function drawNormalCurve() {
-	//Draw the curve
-	ctx.beginPath();
-	ctx.moveTo(start.x, start.y);
-	ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
-	ctx.stroke();
-
-
-	ctx.beginPath();
-	ctx.moveTo(end.x, end.y);
-	ctx.bezierCurveTo(cp3.x, cp3.y, cp4.x, cp4.y, start.x, start.y);
-	ctx.stroke();	
-}
-
-//drawNormalCurve();
-
-*/
-
-
-
-
+//helper-function to visualize the bezierCurves on the 2nd Canvas
 function drawBezierCurvesManually() {
 	for (let i = 0; i < bezierCurves.length; i++) {
 		ctx2.beginPath();
@@ -81,56 +21,61 @@ function drawBezierCurvesManually() {
 		ctx2.strokeStyle = "red";
 		ctx2.stroke();
 		ctx2.closePath();
-
-
-		/*ctx2.beginPath();
-		ctx2.strokeColor = "black";
-		ctx2.arc(bezierCurves[i][0].x, bezierCurves[i][0].y, 5, 0, 2 * Math.PI);
-		ctx2.fillStyle = "blue";
-		ctx2.fill();
-		ct2.closePath();*/
-
 	}
+}
+
+
+//function to clean the canvases, set the new paths and prepare for new found Rounds of Finding Squares
+function eraseTheCurve() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+	paper.project.activeLayer.removeChildren();
+	if (interpolation) {
+		try {
+			path.removeSegments();
+			path.remove();
+		} catch (err) {}
+		path = new paper.Path();
+		path.strokeColor = "black";
+		path.strokeWidth = 5;
+		paper.view.update();
+	} else {
+		path = [];
+	}
+	bezierCurves = [];
+	mouseEnter = true;
+	breakFlag = false;
+	ctx.strokeStyle = "black";
 }
 
 
 
 
-
-/*
-	draws a given point on the canvas
-
-	@params: 
-		point: Point-Object
-		color 
-*/
+//draws a given point on the canvas (regulary, without paper.js)
 function drawPointWOI(point, color) {
 	ctx.beginPath();
 	ctx.strokeColor = "black";
-	ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+	ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
 	ctx.fillStyle = color;
 	ctx.fill();
 	ctx.closePath();
 }
 
-
+//draws a given point on the canvas (with paper.js)
 function drawPoint(point, color) {
 	var pointOff = new Point(point.x, point.y);
 
 	var point = new paper.Path.Circle({
-	    center: path.getNearestPoint(pointOff),
-	    radius: 8, 
-	    fillColor: color
+		center: path.getNearestPoint(pointOff),
+		radius: 8, 
+		fillColor: color
 	});
 }
 
 
 
-/*
-	draws the 4 found points on the canvas
 
-	@param: candidates  stores the 4 points as point-objects
-*/
+//draws the 4 found points on the canvas
 function visualizePoints(candidates) {
 	for (let i = 0; i < candidates.length; i++) {
 		if (interpolation) drawPoint(candidates[i], colors[i]);
@@ -140,19 +85,39 @@ function visualizePoints(candidates) {
 
 
 
-
+//visualizes the sqaure on the given canvas
 function drawTheSquare(candidates, context) {
-
-	console.log("Candidates: ", candidates);
-
 	context.beginPath();
 	context.moveTo(candidates[0].x, candidates[0].y);
+	context.strokeStyle = "blue";
 
 	for (let i = 1; i < candidates.length; i++) {
 		context.lineTo(candidates[i].x, candidates[i].y);
 	}
 	context.closePath();
 	context.stroke();
+}
+
+
+//visualizes the sqaure on the given canvas in interpolation mode
+function drawTheSquareInterpolation(candidates, context) {
+	let pointA;
+	let pointB;
+	let pathLine;
+	for (let i = 0; i < candidates.length-1; i++) {
+		pointA = new paper.Point(path.getNearestPoint(candidates[i]));
+		pointB = new paper.Point(path.getNearestPoint(candidates[i+1]));
+
+		pathLine = new paper.Path.Line(pointA, pointB);
+		pathLine.strokeColor = "blue";
+		pathLine.strokeWidth = 4;
+	}
+
+	pointA = new paper.Point(path.getNearestPoint(candidates[3]));
+	pointB = new paper.Point(path.getNearestPoint(candidates[0]));
+	pathLine = new paper.Path.Line(pointA, pointB);
+	pathLine.strokeColor = "blue";
+	pathLine.strokeWidth = 4;
 }
 
 

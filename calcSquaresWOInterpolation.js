@@ -1,3 +1,7 @@
+/*
+	File contains the algorithm for finding squares on curves represented by a set of points
+*/
+
 
 function getDistanceWOI(pointA, pointB) {
 	return Math.sqrt(
@@ -6,6 +10,14 @@ function getDistanceWOI(pointA, pointB) {
 	);
 }
 
+
+/*
+function that calculates the candidates (points a specific dis away from reference point)
+
+	@OPERATION PRINCIPLE:
+		naive search in O(n^2) time
+
+*/
 function calcCandidatesForPointWOI(referencePoint, dis) {
 	let candidates = [];
 	let distanceOld = 0;
@@ -35,11 +47,11 @@ function calcCandidatesForPointWOI(referencePoint, dis) {
 }
 
 
-
+/*
+	recursive function to filter the candidates
+*/
 function findSquaresWOI(n, candidates, dis) {
 	if (n == 4) {
-		//visualizePoints(candidates);
-
 		if (breakFlag) return;
 
 		if (isSquareWOI(candidates, dis)) {
@@ -67,7 +79,7 @@ function findSquaresWOI(n, candidates, dis) {
 
 
 
-
+//checks if a Tupel of points is a square on the curve
 function isSquareWOI(candidates, dis) {
 	//vectors
 	let vectorP1P4 = [candidates[3].x - candidates[0].x, candidates[3].y - candidates[0].y];

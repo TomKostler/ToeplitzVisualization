@@ -1,11 +1,8 @@
 /*
-	- File for calculating Points on BezierCurves via Parametrisation
-	- File for checking if a sqaure with a given sidelength and P1 P1 is on the curves
+	File contains the algorithm to find squares on interpolated curves
+	- calculating Points on BezierCurves via Parametrisation
+	- finding squares in curves with given starting Point P1 and sidelength d
 */
-
-
-var breakFlag = false;
-var counter = 0;
 
 
 
@@ -40,6 +37,7 @@ class Point {
 	
 	@param  referencePoint: point-object the new points should be distance dis away
 	@param  dis: euclidean distance of the vertices of the square
+	@param  bezierCurves: array of all the interpolated curves
 
 	@return points: an array consisiting of all the found point-objects with distance dis to the reference point
 
@@ -53,12 +51,12 @@ function calcCandidatesForPoint(referencePoint, dis, bezierCurves) {
 
 	let stepsCandidates = steps;
 	let distanceOld = 0;
-	let counter = 0;
 
 	for (let c = referencePoint.splinePart; c < referencePoint.splinePart + bezierCurves.length; c++) {
+
 		for (let t = c == referencePoint.splinePart ? referencePoint.t : 0; t <= 1; t += stepsCandidates) {
 
-			//calc cycle correct
+			//calc cycle correct so that every BezierCurve is analysed
 			if (c >= bezierCurves.length && c%bezierCurves.length == referencePoint.splinePart && t >= referencePoint.t-offset) break;
 
 
@@ -79,17 +77,16 @@ function calcCandidatesForPoint(referencePoint, dis, bezierCurves) {
 				}
 
 				
-				//inferring
-				if ((distance - dis) > (distanceOld - dis) && stepsCandidates <= 0.35) {
+				//INFERRING => idea: if the sidelengths (dis) are too big and also increasing => make the steps exponentially fast bigger; else => make them exponentially fast smaller
+				let maxStepCand = simulationMode ? complexity/1.2 : 0.5
+				if ((distance - dis) > (distanceOld - dis) && stepsCandidates <= maxStepCand) {
 					stepsCandidates += inferringRate;
 				} else {
-					if ((distance > dis) && (stepsCandidates-inferringRate) >= steps) {
-						//console.log(stepsCandidates, steps);
-						counter++;
-						stepsCandidates -= inferringRate;
+					if ((distance > dis)) {
+						if ((stepsCandidates-inferringRate) >= steps) stepsCandidates -= 1.07*inferringRate;
+						else stepsCandidates = steps;
 					}
 				}
-				
 
 				distanceOld = distance;
 			}
@@ -101,7 +98,7 @@ function calcCandidatesForPoint(referencePoint, dis, bezierCurves) {
 
 
 
-
+//calculates the point on the Cubic BezierCurve with paramter t
 function calculateCubicBezierPoint(points, t) {
 	const [p0, p1, p2, p3] = points;
 	const x = (1 - t) ** 3 * p0.x + 3 * (1 - t) ** 2 * t * p1.x + 3 * (1 - t) * t ** 2 * p2.x + t ** 3 * p3.x;
@@ -111,7 +108,7 @@ function calculateCubicBezierPoint(points, t) {
 
 
 
-
+//calculates the euclidean distance from pointA to pointB with vectors
 function getDistance(pointA, pointB) {
 	return Math.sqrt(
 		Math.pow(pointA.x - pointB.x, 2) +
@@ -134,23 +131,19 @@ function findSquares(n, candidates, dis) {
 	if (breakFlag == true) return;
 
 	if (n == 4) {
-		document.getElementById("canvas").getContext("2d").clearRect(0, 0, 1000, 1000);
-
-		/*counter++;
-		if (counter == 1) {
-			breakFlag = true;
-		}*/
-
+		document.getElementById("canvasMain").getContext("2d").clearRect(0, 0, 1000, 1000);
 
 		if (isSquare(candidates, dis)) {
-			//drawBezierCurvesManually();
+			
 			drawTheSquare(candidates, ctx2);
-			//path.strokeColor = "white";
-			drawBezierCurvesManually();
-			path.strokeColor = "black";
+			visualizePoints(candidates);
+			drawTheSquareInterpolation(candidates, ctx);
+			
 			breakFlag = true;
-			console.log(candidates[0], candidates[1], candidates[2], candidates[3]);
-			alert("Sqaure found");
+			document.getElementById("loaderSimulation").style.animationPlayState = "paused";
+			document.getElementById("loaderSimulation").style.visibility = "hidden";
+
+			setTimeout(() => alert("Sqaure found"), 0);
 			return;
 		} else {
 			return;
@@ -161,10 +154,10 @@ function findSquares(n, candidates, dis) {
 	let candidatesLevelN = calcCandidatesForPoint(candidates[candidates.length-1], dis, bezierCurves);
 
 
-
 	for (let i = 0; i < candidatesLevelN.length; i++) {
 		candidates.push(candidatesLevelN[i]);
 		findSquares(n+1, candidates, dis);
+		//backtracking
 		candidates.pop();
 	}
 }
@@ -210,7 +203,6 @@ function isSquare(candidates, dis) {
 	let angleDegreeAlpha = Math.acos(scalarProdAlpha / (disP1P2 * disP4P1)) * (180 / Math.PI);
 	let angleDegreeBeta = Math.acos(scalarProdBeta / (disP3P4 * disP2P3)) * (180 / Math.PI);
 	let angleDegreeGamma = Math.acos(scalarProdGamma / (disP2P3 * disP1P2))  * (180 / Math.PI);
-	//console.log("Angle: " , angleDegreeAlpha, angleDegreeBeta, angleDegreeGamma);
 
 
 
