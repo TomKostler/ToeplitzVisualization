@@ -1,7 +1,7 @@
 # Toeplitz' Visualization
 Visualization of the famous unsolved problem by mathematician Otto Toeplitz proposed in 1911.
 
-![Demo](ToeplitzScreenRecording.gif)
+![Demo](ReadmeRecordings/ToeplitzScreenRecording.gif)
 
 # The problem
 The Toeplitz' Conjecture or inscribed square problem, is an open problem in the field of geometry and topology. It asks whether every Jordan Curve (a simple closed curve) in R^2 contains the vertices of a square.
@@ -16,8 +16,12 @@ The fact that it is a still-open problem captivates me, motivating my desire to 
 ## Simulation Mode
 In this mode **random generated Jordan Curves** are automatically traversed and inscribed squares are found. 
 * "Alter Circle": This Simulation Strategy uses a circle with random radius and position on the canvas as a starting point and adds random points to the path in the correct order. It also generates a random path from the circle to this tip-point and back with varying complexity.
+
+<img src="ReadmeRecordings/ToeplitzScreenRec-SimulationAlterCircle.gif" width="250" height="160">
+
 * "TSP": This Strategy sets random points on the canvas and then finds a route through them to order them. This is done with the Travelling Salesman Problem (TSP) - heuristic "Nearest Neighbor Insertion" in $O(n^2)$
 
+<img src="ReadmeRecordings/toeplitzScreenRec-SimulationTSP.gif" width="250" height="160">
 
 ## Algorithm for finding squares on interpolated curves
 After calculating the maximum distance two points can have on the curve, the algo traverses the Bézier-splines of the whole curve and checks for squares $\leq$ the found maximum distance. Continuing with finding "candidate-points" for a specific reference point and distance d, the algo checks these candidates recursively with backtracking in order to find squares.
@@ -35,6 +39,7 @@ Since there are more Bézier-splines with complex curves, the start step-size, w
 ## Drawing mode
 Lets the user draw own Jordan Curves. Before the algo (either interpolated or non interpolated) is called to traverse the curve, it is checked for self intersections.
 
+<img src="ReadmeRecordings/ToeplitzScreenRec-Drawing.gif" width="250" height="160">
 
 
 
